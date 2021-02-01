@@ -1,6 +1,13 @@
 function ApproximateVolumetricReconstruction()
 
-SDD = 200;
+% Environment setup
+% SDD: source detector distance
+% SAD: source axis distance
+% ADD: axis detector distance
+% S: source
+% C: detector center
+% W: normal vector from detector
+SDD = 200; 
 SAD = 100;
 ADD = 100;
 Ock = [0; 0; 0];
@@ -16,16 +23,23 @@ Cb = RzNeg*C0;
 Wa = (Ca-Sa)/norm(Ca-Sa);
 Wb = (Cb-Sb)/norm(Cb-Sb);
 
-image(Ca, Cb);
+polyin = CreateCircles(2,C0);
+centroids = FindCentroids(polyin);
 
-pts = [Ock.';Sa.';Sb.';Ca.';Cb.'];
+env = [Ock.';Sa.';Sb.';Ca.';Cb.';Wa.';Wb.'];
+plotSystem(env,centroids)
+end
 
+function plotSystem(env, centroids)
 hold on
-scatter3(pts(:,1), pts(:,2), pts(:,3));
-plotCircle3D(Ca.',Wa.',20);
-plotCircle3D(Cb.',Wb.',20);
-hold off
+scatter3(env(:,1), env(:,2), env(:,3));
+plotCircle3D(env(4,:),env(6,:),15);
+plotCircle3D(env(5,:),env(7,:),15);
 
+for i=1:size(centroids,1)
+    plot(centroids(i,1),centroids(i,2),'r*')
+end
+hold off
 end
 
 function plotCircle3D(center,normal,radius)
@@ -35,31 +49,25 @@ points=repmat(center',1,size(theta,2))+radius*(v(:,1)*cos(theta)+v(:,2)*sin(thet
 plot3(points(1,:),points(2,:),points(3,:),'r-');
 end
 
-function image(Ov, Oy)
+function polyshapes = CreateCircles(NCircle,C0)
 r = 15;
 n = 100;
-
 theta = (0:n-1)*(2*pi/n);
-x1 = Ov(1) + r*cos(theta);
-y1 = Ov(2) + r*sin(theta);
-polyin1 = polyshape(x1,y1);
+for i=1:NCircle
+    x = C0(1) + r*cos(theta);
+    y = C0(2) + r*sin(theta);
+    polyin = polyshape(x,y);
+    polyshapes(i,:) = polyin;
+end
+end
 
-x2 = Oy(1) + r*cos(theta);
-y2 = Oy(2) + r*sin(theta);
-polyin2 = polyshape(x2,y2);
+function centroids = FindCentroids(polyin)
+RzNeg = [cosd(45) sind(45) 0 ; -sind(45) cosd(45) 0 ; 0 0 1];
+RzPos = [cosd(-45) sind(-45) 0 ; -sind(-45) cosd(-45) 0 ; 0 0 1];
 
-plot(polyin1)
-plot(polyin2)
-axis equal
+[x,y] = centroid(polyin(1,:));
+centroids(1,:) = RzNeg*[x;y;0];
 
-[x11,y11] = centroid(polyin1);
-[x22,y22] = centroid(polyin2);
-plot(polyin1)
-hold on
-plot(polyin2)
-hold on
-plot(x11,y11,'r*')
-hold on
-plot(x22,y22,'r*')
-hold off
+[x,y] = centroid(polyin(1,:));
+centroids(2,:) = RzPos*[x;y;0];
 end
