@@ -25,16 +25,36 @@ Wb = (Cb-Sb)/norm(Cb-Sb);
 
 polyin = CreateCircles(2,C0);
 centroids = FindCentroids(polyin);
+M = SymbolicIntersection(centroids, [Sb.';Sa.'])
 
-env = [Ock.';Sa.';Sb.';Ca.';Cb.';Wa.';Wb.'];
-plotSystem(env,centroids)
+env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
+vec = [Wa.';Wb.'];
+plotSystem(env,vec,centroids,M)
 end
 
-function plotSystem(env, centroids)
+function SI = SymbolicIntersection(centroids, sources)
+v1 = (sources(1,:)-centroids(1,:))./abs(sources(1,:)-centroids(1,:));
+v2 = (sources(2,:)-centroids(2,:))./abs(sources(2,:)-centroids(2,:));
+v1(3) = 0;
+v2(3) = 0;
+v3 = cross(v1,v2);
+
+P = centroids(1,:).' - centroids(2,:).';
+V = [-(v1.'), v2.', v3.'];
+t = V\P;
+
+L1 = v1*t(1) + centroids(1,:);
+L2 = v2*t(2) + centroids(2,:);
+
+SI = (L1+L2)/2;
+end
+
+function plotSystem(env,vec,centroids,M)
 hold on
-scatter3(env(:,1), env(:,2), env(:,3));
-plotCircle3D(env(4,:),env(6,:),15);
-plotCircle3D(env(5,:),env(7,:),15);
+scatter3(M(1),M(2),M(3),'filled','cyan');
+scatter3(env(:,1), env(:,2), env(:,3),'black');
+plotCircle3D(env(4,:),vec(1,:),15);
+plotCircle3D(env(5,:),vec(2,:),15);
 
 for i=1:size(centroids,1)
     plot(centroids(i,1),centroids(i,2),'r*')
