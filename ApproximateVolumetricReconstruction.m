@@ -25,11 +25,12 @@ Wb = (Cb-Sb)/norm(Cb-Sb);
 
 polyin = CreateCircles(2,C0);
 centroids = FindCentroids(polyin);
-M = SymbolicIntersection(centroids, [Sb.';Sa.'])
+M = SymbolicIntersection(centroids, [Sb.';Sa.']);
 
 env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
 vec = [Wa.';Wb.'];
 plotSystem(env,vec,centroids,M)
+
 end
 
 function SI = SymbolicIntersection(centroids, sources)
@@ -59,6 +60,9 @@ plotCircle3D(env(5,:),vec(2,:),15);
 for i=1:size(centroids,1)
     plot(centroids(i,1),centroids(i,2),'r*')
 end
+
+Cone(env(2,:),env(4,:),[0 15],20,'none',0,1);
+Cone(env(3,:),env(5,:),[0 15],20,'none',0,1);
 hold off
 end
 
