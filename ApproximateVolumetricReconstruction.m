@@ -29,8 +29,58 @@ M = SymbolicIntersection(centroids, [Sb.';Sa.']);
 
 env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
 vec = [Wa.';Wb.'];
-plotSystem(env,vec,centroids,M)
+% plotSystem(env,vec,centroids,M)
 
+% Testing Base Case Generator
+%  each row is sphere center
+X = [0;100];
+Y = [0;0];
+Z = [10;0];
+R = [100;100]; % radius
+GenerateBaseCase(X,Y,Z,R,Sa,Sb,Ca,Cb,Wa,Wb)
+end
+
+function C = GenerateBaseCase(X,Y,Z,R,Sa,Sb,Ca,Cb,Wa,Wb)
+n = 100;
+RzNeg = [cosd(45) sind(45) 0 ; -sind(45) cosd(45) 0 ; 0 0 1];
+RzPos = [cosd(-45) sind(-45) 0 ; -sind(-45) cosd(-45) 0 ; 0 0 1];
+figure
+P1 = FProjection([X(1),Y(1),Z(1)],Sa,[Ca.';Wa.']);
+P1 = (RzNeg*P1.').'  + [0 100 0];
+P2 = FProjection([X(2),Y(2),Z(2)],Sa,[Ca.';Wa.']);
+P2 = (RzNeg*P2.').' + [0 100 0];
+P = [P1;P2];
+theta = (0:n-1)*(2*pi/n);
+x1 = P1(1) + R(1)*cos(theta);
+y1 = P1(3) + R(1)*sin(theta);
+PS1 = polyshape(x1,y1);
+x2 = P2(1) + R(2)*cos(theta);
+y2 = P2(3) + R(2)*sin(theta);
+PS2 = polyshape(x2,y2);
+unionpoly = union(PS1,PS2);
+plot(unionpoly)
+hold off
+[x,y,z] = sphere;
+figure
+surf(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),'FaceColor','k');
+hold on
+surf(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),'FaceColor','k');
+
+hold off
+axis equal
+end
+
+function projpts = FProjection(pts,source,plane)
+% pts in each row
+% plane is the detector given by n and A
+P = source;
+A = plane(1,:).';
+n = plane(2,:).';
+for i=1:size(pts,1)
+    v = (P-(pts(i,:).'))/norm(P-(pts(i,:).'));
+    t = dot((A-P),n)/dot(v,n);
+    projpts(i,:) = P + v*t;
+end
 end
 
 function SI = SymbolicIntersection(centroids, sources)
@@ -63,6 +113,7 @@ end
 
 Cone(env(2,:),env(4,:),[0 15],20,'none',0,1);
 Cone(env(3,:),env(5,:),[0 15],20,'none',0,1);
+axis equal
 hold off
 end
 
