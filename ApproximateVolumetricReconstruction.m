@@ -44,7 +44,7 @@ function C = GenerateBaseCase(X,Y,Z,R,Sa,Sb,Ca,Cb,Wa,Wb)
 n = 100;
 RzNeg = [cosd(45) sind(45) 0 ; -sind(45) cosd(45) 0 ; 0 0 1];
 RzPos = [cosd(-45) sind(-45) 0 ; -sind(-45) cosd(-45) 0 ; 0 0 1];
-figure
+figure('Name','+45 deg about z')
 P1 = FProjection([X(1),Y(1),Z(1)],Sa,[Ca.';Wa.']);
 P1 = (RzNeg*P1.').'  + [0 100 0];
 P2 = FProjection([X(2),Y(2),Z(2)],Sa,[Ca.';Wa.']);
@@ -60,11 +60,31 @@ PS2 = polyshape(x2,y2);
 unionpoly = union(PS1,PS2);
 plot(unionpoly)
 hold off
+axis equal
+
+figure('Name','-45 deg about z')
+P1 = FProjection([X(1),Y(1),Z(1)],Sb,[Cb.';Wb.']);
+P1 = (RzNeg*P1.').'  + [0 100 0];
+P2 = FProjection([X(2),Y(2),Z(2)],Sb,[Cb.';Wb.']);
+P2 = (RzNeg*P2.').' + [0 100 0];
+P = [P1;P2];
+theta = (0:n-1)*(2*pi/n);
+x1 = P1(1) + R(1)*cos(theta);
+y1 = P1(3) + R(1)*sin(theta);
+PS1 = polyshape(x1,y1);
+x2 = P2(1) + R(2)*cos(theta);
+y2 = P2(3) + R(2)*sin(theta);
+PS2 = polyshape(x2,y2);
+unionpoly = union(PS1,PS2);
+plot(unionpoly)
+hold off
+axis equal
+
 [x,y,z] = sphere;
-figure
-surf(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),'FaceColor','k');
+figure('Name','Intersecting Spheres in 3D')
+surf(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),'FaceColor','b');
 hold on
-surf(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),'FaceColor','k');
+surf(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),'FaceColor','b');
 
 hold off
 axis equal
