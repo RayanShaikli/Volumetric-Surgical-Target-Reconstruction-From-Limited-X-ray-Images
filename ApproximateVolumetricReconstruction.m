@@ -33,73 +33,70 @@ vec = [Wa.';Wb.'];
 
 % Testing Base Case Generator
 %  each row is sphere center
-X = [0;100];
-Y = [0;0];
-Z = [10;0];
-R = [100;100]; % radius
+X = [0;0];
+Y = [0;5];
+Z = [0;5];
+R = [10;5]; % radius
 GenerateBaseCase(X,Y,Z,R,Sa,Sb,Ca,Cb,Wa,Wb)
 end
 
 function C = GenerateBaseCase(X,Y,Z,R,Sa,Sb,Ca,Cb,Wa,Wb)
-n = 100;
 RzNeg = [cosd(45) sind(45) 0 ; -sind(45) cosd(45) 0 ; 0 0 1];
 RzPos = [cosd(-45) sind(-45) 0 ; -sind(-45) cosd(-45) 0 ; 0 0 1];
-figure('Name','+45 deg about z')
-P1 = FProjection([X(1),Y(1),Z(1)],Sa,[Ca.';Wa.']);
-P1 = (RzNeg*P1.').'  + [0 100 0];
-P2 = FProjection([X(2),Y(2),Z(2)],Sa,[Ca.';Wa.']);
-P2 = (RzNeg*P2.').' + [0 100 0];
-P = [P1;P2];
-theta = (0:n-1)*(2*pi/n);
-x1 = P1(1) + R(1)*cos(theta);
-y1 = P1(3) + R(1)*sin(theta);
-PS1 = polyshape(x1,y1);
-x2 = P2(1) + R(2)*cos(theta);
-y2 = P2(3) + R(2)*sin(theta);
-PS2 = polyshape(x2,y2);
-unionpoly = union(PS1,PS2);
-plot(unionpoly)
-hold off
-axis equal
-
-figure('Name','-45 deg about z')
-P1 = FProjection([X(1),Y(1),Z(1)],Sb,[Cb.';Wb.']);
-P1 = (RzNeg*P1.').'  + [0 100 0];
-P2 = FProjection([X(2),Y(2),Z(2)],Sb,[Cb.';Wb.']);
-P2 = (RzNeg*P2.').' + [0 100 0];
-P = [P1;P2];
-theta = (0:n-1)*(2*pi/n);
-x1 = P1(1) + R(1)*cos(theta);
-y1 = P1(3) + R(1)*sin(theta);
-PS1 = polyshape(x1,y1);
-x2 = P2(1) + R(2)*cos(theta);
-y2 = P2(3) + R(2)*sin(theta);
-PS2 = polyshape(x2,y2);
-unionpoly = union(PS1,PS2);
-plot(unionpoly)
-hold off
-axis equal
 
 [x,y,z] = sphere;
-figure('Name','Intersecting Spheres in 3D')
-surf(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),'FaceColor','b');
-hold on
-surf(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),'FaceColor','b');
+% projection on detector A
+projpts = FProjection(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),Sa,[Ca.';Wa.']);
+pgonA1 = CreatePolygon(projpts,RzNeg);
+projpts = FProjection(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),Sa,[Ca.';Wa.']);
+pgonA2 = CreatePolygon(projpts,RzNeg);
+pgonA = union(pgonA1,pgonA2);
 
+% projection on detector B
+projpts = FProjection(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1),Sb,[Cb.';Wb.']);
+pgonB1 = CreatePolygon(projpts,RzPos);
+projpts = FProjection(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2),Sb,[Cb.';Wb.']);
+pgonB2 = CreatePolygon(projpts,RzPos);
+pgonB = union(pgonB1,pgonB2);
+
+figure('Name','Detector A: +45 deg about z')
+plot(pgonA)
+
+figure('Name','Detector B: -45 deg about z')
+plot(pgonB)
+
+figure('Name','Intersecting Spheres in 3D')
+surf(x*R(1)+X(1),y*R(1)+Y(1),z*R(1)+Z(1));
+hold on
+surf(x*R(2)+X(2),y*R(2)+Y(2),z*R(2)+Z(2));
 hold off
-axis equal
 end
 
-function projpts = FProjection(pts,source,plane)
+function pgon = CreatePolygon(P,R)
+for i=1:size(P,1)
+    P(i,:) = (R*P(i,:).').'  + [0 100 0];
+end
+P = [P(:,1),P(:,3)];
+size(P)
+k = convhull(P);
+pgon = polyshape(P(k,1),P(k,2));
+end
+
+function projpts = FProjection(X,Y,Z,source,plane)
 % pts in each row
 % plane is the detector given by n and A
 P = source;
 A = plane(1,:).';
 n = plane(2,:).';
-for i=1:size(pts,1)
-    v = (P-(pts(i,:).'))/norm(P-(pts(i,:).'));
-    t = dot((A-P),n)/dot(v,n);
-    projpts(i,:) = P + v*t;
+ctr = 1;
+for i=1:size(X,1)
+    for j=1:size(X,1)
+        pts = [X(i,j),Y(i,j),Z(i,j)];
+        v = (P-(pts.'))/norm(P-(pts.'));
+        t = dot((A-P),n)/dot(v,n);
+        projpts(ctr,:) = P + v*t;
+        ctr = ctr+1;
+    end
 end
 end
 
