@@ -30,23 +30,22 @@ M = SymbolicIntersection(centroids, [Sb.';Sa.']);
 env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
 vec = [Wa.';Wb.'];
 plotSystem(env,vec,centroids,M)
-X1 = [];
-Y1 = [];
-Z1 = [];
-[X,Y,Z] = VoxelGrowing(centroids,M,X1,Y1,Z1);
-
-[X2,Y2,Z2] = meshgrid(X,Y,Z);
-x = X2(:);
-y = Y2(:);
-z = Z2(:);
-[k1,volume] = convhull(x,y,z);
-
-trisurf(k1,x,y,z,'FaceColor','green')
-axis equal
-
-disp(volume)
+setGlobalx(M)
+VoxelGrowingAndrew(centroids,M)
+pts = getGlobalx;
+shp = alphaShape(pts(:,1),pts(:,2),pts(:,3));
+hold on
+plot(shp)
+hold off
 end
-
+function setGlobalx(val)
+global x
+x = val;
+end
+function r = getGlobalx
+global x
+r = x;
+end
 % base case 
 function polyshapes = CreateCircles(NCircle,C0)
 r = 15;
@@ -102,7 +101,7 @@ Cone(env(2,:),env(4,:),[0 15],20,'none',0,1);
 Cone(env(3,:),env(5,:),[0 15],20,'none',0,1);
 
 axis equal
-hold off
+
 
 end
 
@@ -113,7 +112,8 @@ points=repmat(center',1,size(theta,2))+radius*(v(:,1)*cos(theta)+v(:,2)*sin(thet
 plot3(points(1,:),points(2,:),points(3,:),'r-');
 end
 
-function [X,Y,Z] = VoxelGrowing(centroids,voxelcenter,X,Y,Z)
+
+function PTS = VoxelGrowingAndrew(centroids,voxelcenter)
 % voxel center is a row vector
 vs = 2; % voxel size
 hvs = vs/2; % half voxel size
@@ -122,15 +122,7 @@ vert = [hvs hvs hvs; -hvs hvs hvs; hvs hvs -hvs; -hvs hvs -hvs;...
 vert = vert + voxelcenter;
 % vert = [0 0 0;1 0 0;1 1 0;0 1 0;0 0 1;1 0 1;1 1 1;0 1 1];
 fac = [1 2 6 5; 2 4 8 6; 3 4 8 7; 1 3 7 5; 1 2 4 3; 5 6 8 7];
-
-calX = vert(:, 1);
-calY = vert(:, 2);
-calZ = vert(:, 3);
-
-X = [X calX];
-Y = [Y calY];
-Z = [Z calZ];
-
+  
 r = 15;
 n = 100;
 C0 = [0,0,0];
@@ -171,27 +163,27 @@ for i=1:size(roptsA,1)
 end
 inA = inpolygon(planeptsA(:,1),planeptsA(:,2),x,y);
 inB = inpolygon(planeptsB(:,1),planeptsB(:,2),x,y);
-
 if all(inA) && all(inB)
     patch('Vertices',vert,'Faces',fac,...
           'FaceVertexCData',hsv(1),'FaceColor','flat')
+    setGlobalx([getGlobalx;vert]);
     if norm(voxelcenter) < norm(voxelcenter+[-vs,0,0])
-        VoxelGrowing(centroids,voxelcenter+[-vs,0,0],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[-vs,0,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[vs,0,0])
-        VoxelGrowing(centroids,voxelcenter+[vs,0,0],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[vs,0,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,-vs,0])
-        VoxelGrowing(centroids,voxelcenter+[0,-vs,0],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[0,-vs,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,vs,0])
-        VoxelGrowing(centroids,voxelcenter+[0,vs,0],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[0,vs,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,0,-vs])
-        VoxelGrowing(centroids,voxelcenter+[0,0,-vs],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[0,0,-vs])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,0,vs])
-        VoxelGrowing(centroids,voxelcenter+[0,0,vs],X,Y,Z)
+        VoxelGrowingAndrew(centroids,voxelcenter+[0,0,vs])
     end
 end
 end
