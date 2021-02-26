@@ -1,3 +1,4 @@
+
 function ApproximateVolumetricReconstruction()
 
 % Environment setup
@@ -30,10 +31,22 @@ M = SymbolicIntersection(centroids, [Sb.';Sa.']);
 env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
 vec = [Wa.';Wb.'];
 plotSystem(env,vec,centroids,M)
+setGlobalx(M)
 VoxelGrowingAndrew(centroids,M)
-
+pts = getGlobalx;
+[k1,av1] = convhull(pts(:,1),pts(:,2),pts(:,3));
+hold on
+trisurf(k1,pts(:,1),pts(:,2),pts(:,3),'FaceColor','cyan')
+hold off
 end
-
+function setGlobalx(val)
+global x
+x = val;
+end
+function r = getGlobalx
+global x
+r = x;
+end
 % base case 
 function polyshapes = CreateCircles(NCircle,C0)
 r = 15;
@@ -89,7 +102,7 @@ Cone(env(2,:),env(4,:),[0 15],20,'none',0,1);
 Cone(env(3,:),env(5,:),[0 15],20,'none',0,1);
 
 axis equal
-hold off
+
 
 end
 
@@ -101,7 +114,7 @@ plot3(points(1,:),points(2,:),points(3,:),'r-');
 end
 
 
-function VoxelGrowingAndrew(centroids,voxelcenter)
+function PTS = VoxelGrowingAndrew(centroids,voxelcenter)
 % voxel center is a row vector
 vs = 1.75; % voxel size
 hvs = vs/2; % half voxel size
@@ -154,6 +167,7 @@ inB = inpolygon(planeptsB(:,1),planeptsB(:,2),x,y);
 if all(inA) && all(inB)
     patch('Vertices',vert,'Faces',fac,...
           'FaceVertexCData',hsv(1),'FaceColor','flat')
+    setGlobalx([getGlobalx;vert]);
     if norm(voxelcenter) < norm(voxelcenter+[-vs,0,0])
         VoxelGrowingAndrew(centroids,voxelcenter+[-vs,0,0])
     end
