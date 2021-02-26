@@ -166,8 +166,8 @@ end
 inA = inpolygon(planeptsA(:,1),planeptsA(:,2),x,y);
 inB = inpolygon(planeptsB(:,1),planeptsB(:,2),x,y);
 if all(inA) && all(inB)
-    patch('Vertices',vert,'Faces',fac,...
-          'FaceVertexCData',hsv(1),'FaceColor','flat')
+    %patch('Vertices',vert,'Faces',fac,...
+    %      'FaceVertexCData',hsv(1),'FaceColor','flat')
     setGlobalx([getGlobalx;vert]);
     if norm(voxelcenter) < norm(voxelcenter+[-vs,0,0])
         VoxelGrowing(centroids,voxelcenter+[-vs,0,0])
