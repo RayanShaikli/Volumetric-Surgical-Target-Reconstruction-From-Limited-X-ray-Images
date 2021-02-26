@@ -31,12 +31,14 @@ env = [Ock.';Sa.';Sb.';Ca.';Cb.'];
 vec = [Wa.';Wb.'];
 plotSystem(env,vec,centroids,M)
 setGlobalx(M)
-VoxelGrowingAndrew(centroids,M)
+VoxelGrowing(centroids,M)
 pts = getGlobalx;
 shp = alphaShape(pts(:,1),pts(:,2),pts(:,3));
 hold on
 plot(shp)
 hold off
+V = volume(shp);
+disp(V)
 end
 function setGlobalx(val)
 global x
@@ -113,9 +115,9 @@ plot3(points(1,:),points(2,:),points(3,:),'r-');
 end
 
 
-function PTS = VoxelGrowingAndrew(centroids,voxelcenter)
+function PTS = VoxelGrowing(centroids,voxelcenter)
 % voxel center is a row vector
-vs = 2; % voxel size
+vs = 1.25; % voxel size
 hvs = vs/2; % half voxel size
 vert = [hvs hvs hvs; -hvs hvs hvs; hvs hvs -hvs; -hvs hvs -hvs;...
             hvs -hvs hvs; -hvs -hvs hvs; hvs -hvs -hvs; -hvs -hvs -hvs];
@@ -168,22 +170,22 @@ if all(inA) && all(inB)
           'FaceVertexCData',hsv(1),'FaceColor','flat')
     setGlobalx([getGlobalx;vert]);
     if norm(voxelcenter) < norm(voxelcenter+[-vs,0,0])
-        VoxelGrowingAndrew(centroids,voxelcenter+[-vs,0,0])
+        VoxelGrowing(centroids,voxelcenter+[-vs,0,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[vs,0,0])
-        VoxelGrowingAndrew(centroids,voxelcenter+[vs,0,0])
+        VoxelGrowing(centroids,voxelcenter+[vs,0,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,-vs,0])
-        VoxelGrowingAndrew(centroids,voxelcenter+[0,-vs,0])
+        VoxelGrowing(centroids,voxelcenter+[0,-vs,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,vs,0])
-        VoxelGrowingAndrew(centroids,voxelcenter+[0,vs,0])
+        VoxelGrowing(centroids,voxelcenter+[0,vs,0])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,0,-vs])
-        VoxelGrowingAndrew(centroids,voxelcenter+[0,0,-vs])
+        VoxelGrowing(centroids,voxelcenter+[0,0,-vs])
     end
     if norm(voxelcenter) < norm(voxelcenter+[0,0,vs])
-        VoxelGrowingAndrew(centroids,voxelcenter+[0,0,vs])
+        VoxelGrowing(centroids,voxelcenter+[0,0,vs])
     end
 end
 end
